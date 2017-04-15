@@ -1,0 +1,29 @@
+{
+  "name": "selfieslider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "build-css": "stylus source/stylesheets/index.styl -o static/css",
+  "watch-css": "stylus source/stylesheets/index.styl -o static/css -w",
+  "clean": "rm -rf static/css && mkdir -p static/css",
+  "build": "npm run clean && npm run build-css",
+  "watch": "npm run clean && npm run watch-css & nodemon server -e js,jade",
+  "start": "node server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Mohit-Ak@github.com/Mohit-Ak/SelfieSlider.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mohit-Ak/SelfieSlider/issues"
+  },
+  "homepage": "https://github.com/Mohit-Ak/SelfieSlider#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "morgan": "^1.8.1",
+    "nodemon": "^1.11.0"
+  }
+}
