@@ -3,10 +3,9 @@ extend default
 block content
   p.
     Welcome To The Selfie Slider Demo Website. Please Login
-  form.login-form(action='/SelfieHome', method='post')
-      div.
-      input#userName.user-name(type='text', autocomplete='off', placeholder='User Name', name='userName', required='required')
-      div.
-      input#password.password(type='password', autocomplete='off', placeholder='Password', name='password', required='required')
-      div.
-      button#submitButton.submitButton(type='submit') Sign In
+  form.login-form(action='/authorize_user', method='get')
+    div(style='text-align:center; margin-top:5em;')
+      button.btn-instagram(type='submit')
+        b Sign in
+        |  with Instagram
+
