@@ -7,10 +7,10 @@ var http = require('http');
 var ig = require('instagram-node').instagram();
 var request = require('request');
 
-var InstaUser= require('./models/mongo');
+var models= require('./models/mongo');
 
 // Every call to `ig.use()` overrides the `client_id/client_secret`  or `access_token` previously entered if they exist. 
-ig.use({ access_token: '310536973.e3b7231.a6130cafd49644b59b3e3438e8f01650'});
+//ig.use({ access_token: '310536973.e3b7231.a6130cafd49644b59b3e3438e8f01650'});
 ig.use({ client_id: 'e3b7231267f04e37a97f2c2e640ce6ec',
   client_secret: '99467aae21b74427a9e87691468b387d' });
 
@@ -54,7 +54,7 @@ exports.handleauth = function(req, res) {
         access_token: result.access_token
       });
 
-      SelfieAPI.getAllInstaUsersYouFollow(result.user.id,result.user.username,req,res)
+      SelfieAPI.getAllInstaUsersYouFollow(result.access_token, result.user.id,result.user.username,req,res)
 
 
     //res.json(follows);
@@ -80,14 +80,14 @@ exports.handleauth = function(req, res) {
 //     next(e)
 //   }
 // });
-app.get('/getAllInstaUsersYouFollow', function (req, res, next) {
-  try {
-    console.log("Inside getAllInstaUsersYouFollow-"+req.query.userId);
-    SelfieAPI.getAllInstaUsersYouFollow(req.query.userId,req.query.username,req, res);
-  } catch (e) {
-    next(e)
-  }
-});
+// app.get('/getAllInstaUsersYouFollow', function (req, res, next) {
+//   try {
+//     console.log("Inside getAllInstaUsersYouFollow-"+req.query.userId);
+//     SelfieAPI.getAllInstaUsersYouFollow(req.query.userId,req.query.username,req, res);
+//   } catch (e) {
+//     next(e)
+//   }
+// });
 app.get('/getAllMediaFromAUser', function (req, res, next) {
   try {
     console.log("Inside getAllMediaFromAUser-"+req.query.userName);
@@ -112,19 +112,20 @@ app.listen(3000, function(){
 });
 
 SelfieAPI={
-  getAllInstaUsersYouFollow : function(userId,userName,req,res){
-    console.log("getAllInstaUsersYouFollow -"+userId+"("+userName+")-follows");
-    ig.use({ access_token: '310536973.e3b7231.a6130cafd49644b59b3e3438e8f01650'});
+  getAllInstaUsersYouFollow : function(accessToken, userId,userName,req,res){
+    console.log("getAllInstaUsersYouFollow -"+userId+"("+userName+")-follows and access_token is -"+accessToken);
+    ig.use({ access_token: accessToken});
     ig.user_follows(userId, function(err, follows, pagination, limit) {
-      console.log("Follows length -"+follows.length);
+
       if (follows!=null && follows.length!=0) { 
+        console.log("Follows length -"+follows.length);
         var followsRefined=[];
         for(i in follows){
               //console.log(follows[i].id+"-"+follows[i].username);
               followsRefined.push({ userName: follows[i].username, userId: follows[i].id })
             }
             console.log("Mongo - We are going to insert");
-            var newUser = new InstaUser({
+            var newUser = new models.InstaUser({
               userName:  userName,
               userId: userId,
               follows: followsRefined,   
@@ -142,13 +143,50 @@ SelfieAPI={
  
 doMediaProcessing : function(req,res){
   console.log("doMediaProcessing");
-    
-    InstaUser.find({}, function(err, instausers) {
-      if (err) throw err;
-      console.log(instausers);
+    models.InstaUser.find({}, function(err, instausers) {
+      if (err){ 
+        console.log(err);
+        throw err
+      };
+     // console.log("All Instausers-"+instausers);
+      var allFollows=[];
+      instausers.forEach(function(user) {
+       console.log("---------Logging individual userssssss------");
+       //console.log(user); 
+         var userFollows=user.follows;
+         //console.log(userFollows); 
+         console.log("User -"+user.userName+" - userFollows Length -"+userFollows.length);
+        for(var j=0; j<userFollows.length;j++){
+            var fUserName=userFollows[j].userName;
+            var fUserId=userFollows[j].userId;
+            console.log("fUserName - "+fUserName);
+            console.log("fUserId - "+fUserId);
+            models.followsUser.find({ userName: fUserName }, function(err, founduser) {
+              if (err) throw err;
+              console.log("founduser-"+founduser+"-");
+              console.log("founduser-"+founduser.userName+"-");
+              if (founduser.userName==undefined || founduser.userName==null) {
+                   console.log("Not found in followsUser table so we need to insert");
+                   console.log("Mongo - We are going to insert");
+                    var newfUser = new models.followsUser({
+                      userName:  fUserName,
+                      userId: fUserId,
+                      media:[{"imageURL" : "test image url", "productRelated" : "-1"}]
+                    });
+                    newfUser.save(function(err) {
+                      if (err) throw err;
+                      console.log('newfUser saved successfully!');
+                    });
+              }else{
+                console.log("Entry found..."+founduser.userName);
+                console.log("User "+user.UserName+" follows -"+fUserName);
+              }
+            });
+        }
+      });
+      
       res.send("Hello");
     });
-  
 },
 getAllMediaFromAUser : function(userName,req,res){
   console.log("getAllMediaFromAUser  "+userName+" follows");
