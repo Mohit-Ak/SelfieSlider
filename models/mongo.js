@@ -4,9 +4,9 @@ mongoose.connect('mongodb://localhost:27017/selfiedb');
 var db = mongoose.connection;
 var Schema = mongoose.Schema;
 var selfieSchema = new Schema({
-      userName:  String,
-      userId: String,
-      follows: [{ userName: {type: String, unique: true, index: true}, userId: {type: String, unique: true, index: true} }]
+      userName:  {type: String, unique: true, index: true},
+      userId: {type: String, unique: true, index: true},
+      follows: [{ userName: String, userId: String }]
 });
 var followsSchema = new Schema({
       userName: {type: String, unique: true, index: true},

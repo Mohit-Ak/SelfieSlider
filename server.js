@@ -24,8 +24,8 @@ app.use(session({
 }))
 
 var redirect_uri = 'http://localhost:3000/handleauth';
-
 exports.authorize_user = function(req, res) {
+  ig.use({ client_id: 'e3b7231267f04e37a97f2c2e640ce6ec',client_secret: '99467aae21b74427a9e87691468b387d' });
  res.redirect(ig.get_authorization_url(redirect_uri, { scope: ['likes','public_content','basic','relationships','follower_list']}));
 };
 app.get('/authorize_user', exports.authorize_user);
@@ -110,7 +110,7 @@ app.get('/handleauth', exports.handleauth);
 app.listen(3000, function(){
   console.log('Magic happens on port 3000');
 });
-
+ 
 SelfieAPI={
   getAllInstaUsersYouFollow : function(accessToken, userId,userName,req,res){
     console.log("getAllInstaUsersYouFollow -"+userId+"("+userName+")-follows and access_token is -"+accessToken);
@@ -131,7 +131,9 @@ SelfieAPI={
               follows: followsRefined,   
             });
             newUser.save(function(err) {
-              if (err) throw err;
+              if (err){
+                console.log(err);
+              } 
               console.log('User saved successfully!');
             });
           }else{
@@ -161,27 +163,45 @@ doMediaProcessing : function(req,res){
             var fUserId=userFollows[j].userId;
             console.log("fUserName - "+fUserName);
             console.log("fUserId - "+fUserId);
-            models.followsUser.find({ userName: fUserName }, function(err, founduser) {
-              if (err) throw err;
-              console.log("founduser-"+founduser+"-");
-              console.log("founduser-"+founduser.userName+"-");
-              if (founduser.userName==undefined || founduser.userName==null) {
-                   console.log("Not found in followsUser table so we need to insert");
-                   console.log("Mongo - We are going to insert");
-                    var newfUser = new models.followsUser({
-                      userName:  fUserName,
-                      userId: fUserId,
-                      media:[{"imageURL" : "test image url", "productRelated" : "-1"}]
-                    });
-                    newfUser.save(function(err) {
-                      if (err) throw err;
-                      console.log('newfUser saved successfully!');
-                    });
-              }else{
-                console.log("Entry found..."+founduser.userName);
-                console.log("User "+user.UserName+" follows -"+fUserName);
-              }
-            });
+            try{
+                var newfUser = new models.followsUser({
+                  userName:  fUserName,
+                  userId: fUserId,
+                  media:[{"imageURL" : "test image url", "productRelated" : "-1"}]
+                });
+                newfUser.save(function(err) {
+                  if (err){ 
+                    console.log(err);
+                  }else{
+                    console.log('newfUser saved successfully!');
+                  }
+                });
+            }catch(e){
+                console.log('exception during saving');
+                console.log(e);
+            }
+           
+            // models.followsUser.find({ userName: fUserName }, function(err, founduser) {
+            //   if (err) throw err;
+            //   console.log("founduser-"+founduser+"-");
+            //   console.log("founduser-"+founduser.userName+"-");
+            //   if (founduser.userName==undefined || founduser.userName==null) {
+            //        console.log("Not found in followsUser table so we need to insert");
+            //        console.log("Mongo - We are going to insert");
+            //         var newfUser = new models.followsUser({
+            //           userName:  fUserName,
+            //           userId: fUserId,
+            //           media:[{"imageURL" : "test image url", "productRelated" : "-1"}]
+            //         });
+            //         newfUser.save(function(err) {
+            //           if (err) throw err;
+            //           console.log('newfUser saved successfully!');
+            //         });
+            //   }else{
+            //     console.log("Entry found..."+founduser.userName);
+            //     console.log("User "+user.UserName+" follows -"+fUserName);
+            //   }
+            // });
         }
       });
       
