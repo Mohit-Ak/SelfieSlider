@@ -175,7 +175,7 @@ SelfieAPI={
 				 		var newfUser = new models.followsUser({
 				 			userName:  fUserName,
 				 			userId: fUserId,
-				 			media:[{"imageURL" : "test image url", "productRelated" : "-1"}]
+				 			media:[]
 				 		});
 				 		newfUser.save(function(err) {
 				 			if (err){ 
