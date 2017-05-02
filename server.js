@@ -3,6 +3,7 @@ var express = require('express')
 , app = express()
 , session = require('express-session')
 , template = require('jade').compileFile(__dirname + '/source/templates/homepage.jade');
+//, templatecatalogsearch = require('jade').compileFile(__dirname + '/source/templates/catalogsearch.jade');
 var http = require('http');
 var ig = require('instagram-node').instagram();
 var request = require('request');
@@ -38,6 +39,49 @@ app.get('/', function (req, res, next) {
 		next(e)
 	}
 });
+
+app.get('/ecommercetemplate/productDisplay', function (req, res, next) {
+	try {
+		res.redirect('/ecommercetemplate/single.html');
+	} catch (e) {
+		next(e)
+	}
+});
+
+app.get('/getiPhone', function (req, res, next) {
+	try {
+		var cursor = models.followsUser.find({ media: { $elemMatch: {  productRelated: "1" } } }).
+		cursor().
+		map(function (doc) {
+			return doc;
+		});
+		var result=[];
+		cursor.next(function(error, doc) {
+			
+			console.log("------------");
+			if(doc!=null){
+				var length=doc.media.length;
+				for(var j=0;j<length;j++){
+					console.log("#######");
+					console.log(doc.media[j].productRelated=="1");
+					if (doc.media[j].productRelated=="1") {
+							console.log("Match found");
+							result.push(doc.media[j]);
+					}
+					console.log("#######");
+				}
+			}
+			console.log("------------");
+			console.log("result is");
+			console.log(result);
+			res.json(result);
+		});
+
+	} catch (e) {
+		next(e)
+	}
+});
+
 
 exports.handleauth = function(req, res) {
 	ig.authorize_user(req.query.code, redirect_uri, function(err, result) {
@@ -80,22 +124,7 @@ exports.handleauth = function(req, res) {
 //     next(e)
 //   }
 // });
-// app.get('/getAllInstaUsersYouFollow', function (req, res, next) {
-//   try {
-//     console.log("Inside getAllInstaUsersYouFollow-"+req.query.userId);
-//     SelfieAPI.getAllInstaUsersYouFollow(req.query.userId,req.query.username,req, res);
-//   } catch (e) {
-//     next(e)
-//   }
-// });
-// app.get('/getAllMediaFromAUser', function (req, res, next) {
-// 	try {
-// 		console.log("Inside getAllMediaFromAUser-"+req.query.userName);
-// 		SelfieAPI.getAllMediaFromAUser(req.query.userName,req, res);
-// 	} catch (e) {
-// 		next(e)
-// 	}
-// });
+
 
 app.get('/doUserFollowsProcessing', function (req, res, next) {
 	try {
@@ -147,7 +176,9 @@ SelfieAPI={
 					}else{
 						console.log('User '+userName+' Does not follow anyone');
 					}
-					res.json(follows);
+					//res.sendFile(__dirname + '/static/ecommercetemplate/products.html');
+					res.redirect('/ecommercetemplate/products.html');
+					
 				});    
 	},
 
