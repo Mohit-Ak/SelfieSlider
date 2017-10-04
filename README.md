@@ -3,7 +3,7 @@ An innovative way of digital marketing exploiting the untapped opportunity of Mo
 
 “24 Billion Selfies taken during 2016”- Google
 
-## Selfies with products act as -
+## Selfies with products act as:
 - Endorsements.
 - Positive Reviews
 
@@ -21,4 +21,4 @@ An innovative way of digital marketing exploiting the untapped opportunity of Mo
 - Decreasing the overall shopping time.
 - A new structured channel of endorsement.
 
-![Selfie Slider Demo](/SelfieSlider/static/Selfie_Slider_Screenshot.png?raw=true "Selfie Slider Prototype")
+![Selfie Slider Demo](/static/Selfie_Slider_Screenshot.png?raw=true "Selfie Slider Prototype")
